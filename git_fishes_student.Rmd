@@ -119,9 +119,11 @@ We're ready for some coding! Lets do some coding and wrangling of the `OA_activi
 First, write some code below to remove missing data
 
 ```{r, rmMiss}
-# Code to removing missing data from the `OA_activitydat_20190302_BIOL3207.csv` data frame. 
+library(readr)
 library(tidyr)
-data1<- drop_na(data)
+path <- "D:/GitHub/Ocean-Acidification/data/OA_activitydat_20190302_BIOL3207.csv"
+data <- read_csv(path)
+data1<-tidyr::drop_na(data)
 
 ```
 
@@ -129,13 +131,14 @@ Second, drop out irrelevant columns and check that there are no spelling issues 
 
 ```{r summaryTab}
 # Drop irrelevant columns
-library(dplyr)
-data2<- select(data1, -c(loc, comment))
+library(readr)
+library(tidyr)
+data2<- dplyr::select(data1, -c(loc, comment))
 
 # Check spelling in species and treatment but also generate a summary table
-library(hunspell)
-library(dplyr)
-sumtable<- summarise(group_by(data2,species,treatment,size), m.sl=mean(sl), m.activity=mean(activity), se.sl = sd(sl)/sqrt(length(sl)), se.act = sd(activity)/sqrt(length(activity)))
+
+
+sumtable<- dplyr::summarise(dplyr::group_by(data2,species,treatment,size), m.sl=mean(sl), m.activity=mean(activity), se.sl = sd(sl)/sqrt(length(sl)), se.act = sd(activity)/sqrt(length(activity)))
 
 # Use flextable to render the summary table in a tidy format
 library(flextable)
@@ -161,7 +164,10 @@ Ignoring figures can be important because they take up quite a lot of space in y
 ```{r, prettyfig, fig.align='center', fig.cap="add a legend here"}
 # ggplot figure showing mean activity for each treatment (Control, OA) for each species.
 library(ggplot2)
-data3<-summarise(group_by(data2,species,treatment), m.sl=mean(sl), m.activity=mean(activity), se.sl = sd(sl)/sqrt(length(sl)), se.act = sd(activity)/sqrt(length(activity)))
+library(readr)
+library(tidyr)
+
+data3<-dplyr::summarise(dplyr::group_by(data2,species,treatment), m.sl=mean(sl), m.activity=mean(activity), se.sl = sd(sl)/sqrt(length(sl)), se.act = sd(activity)/sqrt(length(activity)))
 
 ggplot(data3, aes(species, m.activity, fill = treatment))+ 
   geom_col(position = 'dodge',width = 0.5)+
@@ -182,13 +188,13 @@ Now that you have the figure you may also want to write / save it as a separate 
 
 ```{r, savefig}
 # Use ggsave to save the figure
-
+ggsave("D:/GitHub/Ocean-Acidification/output/figures/figure1.png",last_plot(), dpi = 300)
 ```
 
 >**Question 6**: Given that you have added `output/figures/` to your `.gitignore` file describe what you notice about what you see in *GitHub Desktop*. 
 
 ```{r}
-## Write your answer here
+## The added figure now can be seen in *GitHub Desktop*. 
 ```
 
 Last question for this task. I promise! It's important to think very carefully about what you track and ignore.
@@ -196,7 +202,7 @@ Last question for this task. I promise! It's important to think very carefully a
 >**Question 7**: Assume that you added the `pics/` folder to your working directory to plot pictures of each fish on your figure. Do you want to track the files in the pic/ folder on GitHub despite them being .png files? Explain your reasoning. 
 
 ```{r, answer6}
-## Add your answer here
+## I don't want to track them because I don't want this file to show in my repo.
 ```
 
 # **Task 6**
@@ -238,14 +244,48 @@ There's not too much to do in this task on the coding front! You just need to cr
 # **Task 9**
 Here, run some statistical tests to determine, for each species, whether the control vs high $CO^2$ treatments differ significantly from each other and in what direction. Provide the difference in means, their 95% confidence intervals, t-statistic, df and p-value. 
 
+
 >**Stretch Task**: You can of course do this for each species seperately, but those who want a challenge, think about how you might use a loop or even some wrangling methods you have already learnt from the tidyverse to run these tests across all 6 species in a single block of code. If you're familiar with functions, you can even think about writing your own function! All these strategies will avoid having to copy and paste large chunks of code. If you're repeating anything, writing functions and loops are good ways to simplify.
 
 ```{r, stats, echo=TRUE, eval=TRUE}
-# Add your code here
+library(ggplot2)
+library(readr)
+library(tidyr)
+
+data4<- data2[data2$species == 'acantho', ]
+data5<- data2[data2$species == 'ambon', ]
+data6<- data2[data2$species == 'chromis', ]
+data7<- data2[data2$species == 'humbug', ]
+data8<- data2[data2$species == 'lemon', ]
+data9<- data2[data2$species == 'whitedams', ]
+result1<-t.test(activity~treatment, data = data4, paired = FALSE)
+result2<-t.test(activity~treatment, data = data5, paired = FALSE)
+result3<-t.test(activity~treatment, data = data6, paired = FALSE)
+result4<-t.test(activity~treatment, data = data7, paired = FALSE)
+result5<-t.test(activity~treatment, data = data8, paired = FALSE)
+result6<-t.test(activity~treatment, data = data9, paired = FALSE)
+
 ```
 
 ```{r, table1, echo=TRUE, eval=TRUE, tab.cap = "write a caption here"}
 # Using the resulting object created above, which should be a table with all the summary statistics, t, df and p-value for each species create a table. Note that there is a tab.cap argument in the chunk arguments. Write a caption here. 
+library(ggplot2)
+library(readr)
+library(tidyr)
+
+df1<-print(as.data.frame(do.call(rbind, result1)))
+df2<-print(as.data.frame(do.call(rbind, result2)))
+df3<-print(as.data.frame(do.call(rbind, result3)))
+df4<-print(as.data.frame(do.call(rbind, result4)))
+df5<-print(as.data.frame(do.call(rbind, result5)))
+df6<-print(as.data.frame(do.call(rbind, result6)))
+l<-data.frame()
+for(i in 1:6){
+  all<-get(paste0("df",i))
+  l<-dplyr::bind_rows(l,all)
+}
+l
+
 ```
 
 Now that you have a table, you can reference it within a document. For example, you can make a call to Table \@ref(tab:table1) by referring to the name of the code chunk. When you knit the html it will create a hyperlink to your table and insert a legend above the table for you. How cool is that!?
@@ -263,14 +303,14 @@ Mean activity for `r "species name here"` in the control group was `r "add code 
 Now, using what you just learnt, describe what the null hypothesis being tested was and provide statistical evidence (t-statistic, df, and p-value) to support your conclusion about whether we can reject the null hypothesis. Again, make sure you use in-line code. Write you answer below:
 
 **Write your answer here**
-
+Mean activity for `r"acantho"` in the control group was `r"x1=27.3;x1`(s / min) compared to the OA treatment group, which was `r "x2=28.9;x2"` (s / min). The difference between control and OA treatment means was `r "p=0.3;p"` (s / min) (95% CI: `r "x3=-4.8;x3"` to `r "x4=1.6;x4"`).
 
 Re-analyse the data for a single species using permutations instead of a t-test. Do your results differ?
 
 >**Stretch Task**:  If you really want a challenge try doing permutation tests for each species. Again, loops, functions or tidyverse (or even combinations might help). 
 
 ```{r, stretch2, echo=TRUE, eval=FALSE}
-# Add your code here.
+
 ```
 
 Below. Add a few sentences for the species (or multiple species) you talked about above to describe the permutation results:
