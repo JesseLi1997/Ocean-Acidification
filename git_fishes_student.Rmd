@@ -182,13 +182,13 @@ Now that you have the figure you may also want to write / save it as a separate 
 
 ```{r, savefig}
 # Use ggsave to save the figure
-
+ggsave("D:/GitHub/Ocean-Acidification/output/figures/figure1.png",last_plot(), dpi = 300)
 ```
 
 >**Question 6**: Given that you have added `output/figures/` to your `.gitignore` file describe what you notice about what you see in *GitHub Desktop*. 
 
 ```{r}
-## Write your answer here
+## The added figure now can be seen in *GitHub Desktop*. 
 ```
 
 Last question for this task. I promise! It's important to think very carefully about what you track and ignore.
@@ -196,7 +196,7 @@ Last question for this task. I promise! It's important to think very carefully a
 >**Question 7**: Assume that you added the `pics/` folder to your working directory to plot pictures of each fish on your figure. Do you want to track the files in the pic/ folder on GitHub despite them being .png files? Explain your reasoning. 
 
 ```{r, answer6}
-## Add your answer here
+## I don't want to track them because I don't want this file to show in my repo.
 ```
 
 # **Task 6**
